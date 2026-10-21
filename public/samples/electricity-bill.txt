@@ -1,0 +1,10 @@
+SAMPLE DOCUMENT — NOT A REAL UTILITY BILL
+For the MinusOne demonstration only.
+
+Business: Siam Craft Foods
+Location: Samut Prakan, Thailand
+Billing period: September 2026
+Consumption: 12,000 kWh
+Total due: THB 54,000.00
+
+These synthetic values are not evidence of actual consumption or payment.

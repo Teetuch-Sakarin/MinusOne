@@ -1,0 +1,32 @@
+# Render Blueprint: full application with durable SQLite and uploaded documents.
+# This creates a PAID web service and persistent disk when approved in Render.
+services:
+  - type: web
+    name: minusone-demo
+    runtime: node
+    region: singapore
+    plan: starter
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build && npm prune --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: off
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: '10000'
+      - key: DATA_DIR
+        value: /var/data/minusone
+      - key: TRUST_PROXY_HOPS
+        value: '1'
+      - key: DEMO_ACCESS_PASSWORD
+        generateValue: true
+    disk:
+      name: minusone-data
+      mountPath: /var/data
+      sizeGB: 1
