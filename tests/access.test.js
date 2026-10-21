@@ -4,12 +4,13 @@ import { randomBytes } from 'node:crypto';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
+import { once } from 'node:events';
 import { createApp } from '../server/app.js';
 
 test('hosted demo requires the shared password for frontend, project data, and files', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'minusone-access-'));
-  const password = randomBytes(24).toString('hex');
+  const password = randomBytes(12).toString('base64url');
   const { app, store } = createApp({ dataDir: dir, accessPassword: password, trustProxyHops: 1 });
   const server = app.listen(0, '127.0.0.1');
   await new Promise((resolve) => server.once('listening', resolve));
@@ -58,10 +59,10 @@ test('hosted demo requires the shared password for frontend, project data, and f
   assert.equal(health.headers.has('set-cookie'), false);
 });
 
-test('production startup refuses an absent or short access password before opening the database', () => {
+test('production startup refuses passwords outside the exact 16-character requirement before opening the database', () => {
   const dir = mkdtempSync(join(tmpdir(), 'minusone-startup-'));
   try {
-    for (const password of ['', 'short']) {
+    for (const password of ['', 'short', 'x'.repeat(17)]) {
       const result = spawnSync(process.execPath, ['server/index.js'], {
         encoding: 'utf8',
         timeout: 5000,
@@ -74,10 +75,51 @@ test('production startup refuses an absent or short access password before openi
         },
       });
       assert.equal(result.status, 1);
-      assert.match(result.stderr, /requires DEMO_ACCESS_PASSWORD of at least 16 characters/);
+      assert.match(result.stderr, /requires DEMO_ACCESS_PASSWORD of exactly 16 characters/);
       assert.equal(existsSync(join(dir, 'minusone.sqlite')), false);
     }
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
+});
+
+test('production startup accepts a private 16-character password', async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'minusone-startup-valid-'));
+  const child = spawn(process.execPath, ['server/index.js'], {
+    env: {
+      ...process.env,
+      NODE_ENV: 'production',
+      DEMO_ACCESS_PASSWORD: randomBytes(12).toString('base64url'),
+      DATA_DIR: dir,
+      HOST: '127.0.0.1',
+      PORT: '0',
+    },
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+  t.after(async () => {
+    if (child.exitCode === null) {
+      const exited = once(child, 'exit');
+      child.kill('SIGTERM');
+      await exited;
+    }
+    rmSync(dir, { recursive: true, force: true });
+  });
+  await new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Production startup timed out.')), 5000);
+    child.once('error', (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.once('exit', () => {
+      clearTimeout(timer);
+      reject(new Error('Production startup failed.'));
+    });
+    child.stdout.on('data', (chunk) => {
+      if (chunk.toString().includes('listening on port')) {
+        clearTimeout(timer);
+        resolve();
+      }
+    });
+  });
+  assert.equal(existsSync(join(dir, 'minusone.sqlite')), true);
 });

@@ -25,19 +25,19 @@ npm start
 
 The API and built frontend are then served together on port **3001**. `GET /api/health` checks the server and SQLite connection. `GET /api/projects` returns available projects. Live processes must be restarted when a cloud environment is restored.
 
-To publish an HTTPS demo site, use the checked-in **Render Blueprint** (`render.yaml`). See [docs/deployment.md](docs/deployment.md) for the account connection, paid persistent-disk plan, generated access password, and live verification steps. Publishing this development environment alone does not create a website.
+To publish an HTTPS demo site, use the checked-in **Render Blueprint** (`render.yaml`). See [docs/deployment.md](docs/deployment.md) for the account connection, paid persistent-disk plan, private access-password entry, and live verification steps. Publishing this development environment alone does not create a website.
 
 Optional server variables:
 
-| Variable               | Default                        | Purpose                                                                                      |
-| ---------------------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
-| `PORT`                 | `3001`                         | HTTP server port                                                                             |
-| `HOST`                 | `127.0.0.1`                    | Bind address; keep the demo local                                                            |
-| `DATA_DIR`             | `data`                         | SQLite database and uploads directory                                                        |
-| `DB_PATH`              | `<DATA_DIR>/minusone.sqlite`   | Override the database location                                                               |
-| `CHROMIUM_PATH`        | System Chromium when available | Browser test executable                                                                      |
-| `DEMO_ACCESS_PASSWORD` | Unset locally                  | Shared demo access password; required with at least 16 characters when `NODE_ENV=production` |
-| `TRUST_PROXY_HOPS`     | `0`                            | Use `1` behind Render's trusted HTTPS reverse proxy                                          |
+| Variable               | Default                        | Purpose                                                                                |
+| ---------------------- | ------------------------------ | -------------------------------------------------------------------------------------- |
+| `PORT`                 | `3001`                         | HTTP server port                                                                       |
+| `HOST`                 | `127.0.0.1`                    | Bind address; keep the demo local                                                      |
+| `DATA_DIR`             | `data`                         | SQLite database and uploads directory                                                  |
+| `DB_PATH`              | `<DATA_DIR>/minusone.sqlite`   | Override the database location                                                         |
+| `CHROMIUM_PATH`        | System Chromium when available | Browser test executable                                                                |
+| `DEMO_ACCESS_PASSWORD` | Unset locally                  | Shared demo access password; exactly 16 characters required when `NODE_ENV=production` |
+| `TRUST_PROXY_HOPS`     | `0`                            | Use `1` behind Render's trusted HTTPS reverse proxy                                    |
 
 Files in `data/`, dependencies, generated builds, and test artifacts are ignored by Git. **Do not delete `data/` to refresh dependencies.** For a fresh demo without losing existing data, start with a different `DATA_DIR`. Back up the database consistently with SQLite's backup tooling and copy the uploads directory; copying a live database without its WAL can lose writes.
 

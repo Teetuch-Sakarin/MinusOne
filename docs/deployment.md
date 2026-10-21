@@ -9,7 +9,7 @@ This is a **paid** deployment: a Starter web service plus a 1 GB persistent disk
 1. Sign in at Render and connect the GitHub account with access to `Teetuch-Sakarin/MinusOne`.
 2. Create a **Blueprint** from that repository's `main` branch. Render reads the checked-in `render.yaml`. You can also use the [Render deployment entry](https://render.com/deploy?repo=https://github.com/Teetuch-Sakarin/MinusOne).
 3. Review the Starter service and 1 GB disk, then approve creation in Render. The selected service/disk are billable. Render creates the actual site address; a custom domain is optional.
-4. The Blueprint generates a random `DEMO_ACCESS_PASSWORD` securely on the host. After provisioning, retrieve it from the service's Environment settings. The HTTP Basic sign-in username is **`minusone`**. Share the password only with intended demo participants, through a secure channel.
+4. The Blueprint prompts you to enter `DEMO_ACCESS_PASSWORD` privately. Use a password manager to create a random password of **exactly 16 characters**. For an existing service, update the value in its Environment settings and deploy the latest commit. The HTTP Basic sign-in username is **`minusone`**. Share the password only with intended demo participants, through a secure channel.
 5. Open the HTTPS address assigned by Render, authenticate, and check the sample dashboard. Validate `/api/health` returns `status: ok` and `database: true`. The health endpoint is intentionally public and does not include project or document data.
 6. Make a test project with sample data, restart the service from Render, and confirm the project remains. Check a reviewed sample document and download an application package to verify persistence and routing.
 
@@ -19,15 +19,15 @@ The deployment starts with fresh sample data. Existing local `data/` and uploade
 
 ## Runtime contract
 
-| Setting                | Hosted value                  | Purpose                                                  |
-| ---------------------- | ----------------------------- | -------------------------------------------------------- |
-| `NODE_VERSION`         | `24`                          | Native SQLite and the pinned dependency runtime          |
-| `NODE_ENV`             | `production`                  | Enforces the shared access password at startup           |
-| `HOST`                 | `0.0.0.0`                     | Listens on the provider network interface                |
-| `PORT`                 | `10000`                       | Web-service port                                         |
-| `DATA_DIR`             | `/var/data/minusone`          | Database and uploads on the persistent disk              |
-| `TRUST_PROXY_HOPS`     | `1`                           | Trusts Render's nearest reverse proxy for secure cookies |
-| `DEMO_ACCESS_PASSWORD` | Generated privately by Render | Shared demo access; at least 16 characters               |
+| Setting                | Hosted value                | Purpose                                                  |
+| ---------------------- | --------------------------- | -------------------------------------------------------- |
+| `NODE_VERSION`         | `24`                        | Native SQLite and the pinned dependency runtime          |
+| `NODE_ENV`             | `production`                | Enforces the shared access password at startup           |
+| `HOST`                 | `0.0.0.0`                   | Listens on the provider network interface                |
+| `PORT`                 | `10000`                     | Web-service port                                         |
+| `DATA_DIR`             | `/var/data/minusone`        | Database and uploads on the persistent disk              |
+| `TRUST_PROXY_HOPS`     | `1`                         | Trusts Render's nearest reverse proxy for secure cookies |
+| `DEMO_ACCESS_PASSWORD` | Entered privately in Render | Shared demo access; exactly 16 characters                |
 
 The build runs `npm ci --include=dev`, `npm run build`, and `npm prune --omit=dev`. The service runs `npm start`. Database creation and sample seeding happen on first startup **after** the persistent disk is mounted, not during the build.
 

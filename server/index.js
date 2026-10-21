@@ -1,9 +1,9 @@
 import { createApp } from './app.js';
 const isProduction = process.env.NODE_ENV === 'production';
 const accessPassword = process.env.DEMO_ACCESS_PASSWORD;
-if (isProduction && (!accessPassword || accessPassword.length < 16)) {
+if (isProduction && (!accessPassword || [...accessPassword].length !== 16)) {
   throw new Error(
-    'Production demo hosting requires DEMO_ACCESS_PASSWORD of at least 16 characters. Configure it securely in your hosting dashboard.',
+    'Production demo hosting requires DEMO_ACCESS_PASSWORD of exactly 16 characters. Configure it securely in your hosting dashboard.',
   );
 }
 const trustProxyHops = Number(process.env.TRUST_PROXY_HOPS || 0);
